@@ -66,7 +66,7 @@ node tools/browse.mjs "http://127.0.0.1:3123/?token=<token>" --out shot.png \
 
 GitHub Token 与 SkillsMP API Key 都是可选的：不填也能搜索与安装，只是额度低、私有仓库不可用。
 
-- 插件内：左侧栏「技能管理」→ **设置** → 填写 → 保存（字段旁 **?** 悬浮提示含获取路径与额度要点）。
+- 插件内：左侧栏「技能管理」→ **设置** → 填写 → 保存（字段旁 **说明** 点击展开，含获取路径与额度要点）。
 - 配置文件：`~/.dsh/skill-manager/config.json`，字段 `githubToken` / `skillsmpKey`。
 
 完整的获取步骤、权限取舍、额度表与故障排查见 **[docs/credentials.md](docs/credentials.md)**。

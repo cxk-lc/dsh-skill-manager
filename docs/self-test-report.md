@@ -87,3 +87,72 @@ dsh plugin --profile desktop remove dsh-skill-manager
 
 备份：`/tmp/dsh-desktop-backup/`（安装前的 `package.json`、`cordis.patch.yml`、`pnpm-lock.yaml`）。
 插件自身数据：`~/.dsh/skill-manager/`（config.json / installed.json），可整目录删除。
+
+## 2026-11-02 · 凭证文档与设置页提示
+
+### 1. 改动范围
+
+- 新增 `docs/credentials.md`：GitHub Token / SkillsMP API Key 的一览、获取步骤（fine-grained / classic）、权限取舍、额度表、两种配置方式、存储安全、故障排查，第 6 节给出页面提示原文。
+- `README.md` 新增「配置凭证」段与「文档」索引表，两处均链接到 `docs/credentials.md`。
+- `lib/client.js` 设置页：两个凭证字段旁新增 **?** 悬浮/聚焦提示（`InfoTip`），文案与文档第 6 节逐字一致；字段下方短提示同步修正（SkillsMP 免费账号 Key 与匿名同为 50 次/日）。
+- 新增 `test/docs-consistency.test.js`：断言 tooltip 文案 == 文档第 6 节引文、README 含链接、文档含关键信息。
+- 顺带修复：`.dsm-field` 为纵向 flex，输入框继承 `flex:1 1 240px` 导致高度被拉到 240px；改为 `flex:0 0 auto`（实测高度 240 → 34px）。
+
+### 2. 测试命令与结果
+
+```bash
+node --test test/*.test.js
+```
+
+结果：31 项全部通过（原 28 项 + 文档一致性 3 项）。
+
+### 3. 人工/辅助验证
+
+- `node tools/browse.mjs` 打开设置页：`.dsm-tip-dot` 共 2 个；聚焦第 1/2 个分别取到与文档一致的说明文本。
+- 交互验证：`mouseover` 打开 = true、`mouseout` 关闭 = true、点击切换开/关各 = true。
+- 视觉：提示面板位于 **?** 右侧（1440 视口下 left 466 / right 812），不遮挡左侧标签与输入框起始位置，控制台 0 异常。
+- 截图：`tip3.png`（GitHub Token 提示）、`tip2.png`（修复前的高度异常对照）。
+
+### 4. 已知问题与未覆盖项
+
+- 提示面板在窄窗口（<820px）改为向下展开，未在真实窄窗口中逐一截图确认。
+- 英文界面下的提示文案已同步翻译，但未逐屏走查英文渲染。
+- 文档与提示的一致性由单测守住；若未来改动文案，需先改文档第 6 节再同步字典，否则测试会失败（这是有意设计）。
+
+### 5. 对应提交
+
+- 本轮提交：`docs: 新增凭证配置说明并在 README 加入口`、`feat: 设置页凭证项补充悬浮说明并加一致性测试`
+
+## 2026-11-02 · 凭证说明改为点击展开
+
+### 1. 改动范围
+
+- 交互调整：设置页两个凭证项的说明由「悬浮气泡」改为「点击展开/收起」的折叠面板；收起时只占一个「▸ 说明」按钮，展开后插入在标签行与输入框之间，输入框随之下移，不覆盖任何内容。
+- `lib/client.js`：移除 `InfoTip`（hover/focus 触发）与浮层定位样式，新增 `HelpTrigger` + `helpLines()`；面板按行渲染为「标签 + 内容」，标签加粗，文本仍取自同一份字典。
+- 文档同步：`docs/credentials.md` §3.1 与 §6 的表述由“悬浮提示”改为“说明面板”；`README.md`、`docs/acceptance-checklist.md` 同步措辞。
+- 一致性测试保持有效（`test/docs-consistency.test.js` 仍校验面板文案 == 文档 §6）。
+
+### 2. 测试命令与结果
+
+```bash
+node --test test/*.test.js
+```
+
+结果：31 项全部通过（含 3 项文档一致性）。
+
+### 3. 人工/辅助验证
+
+- `node tools/browse.mjs` 打开设置页：初始 `.dsm-help-panel` 数量为 0（默认收起）。
+- 点击第 1 个「说明」→ 面板出现且 `aria-expanded="true"`；再点一次 → 面板消失、`aria-expanded="false"`。
+- 两个字段互不影响（分别展开/收起）。
+- 面板文本与 `docs/credentials.md` §6 逐字一致（单测断言）。
+- 控制台 0 异常；展开后输入框位置下移、页面无跳动遮挡。
+
+### 4. 已知问题与未覆盖项
+
+- 折叠状态不持久化：离开「设置」页再回来会回到收起状态（有意为之，避免页面加载即铺开长文案）。
+- 窄窗口下的换行表现未逐档截图确认。
+
+### 5. 对应提交
+
+- 本轮提交：`refactor: 设置页凭证说明改为点击展开收起`
