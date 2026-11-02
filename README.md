@@ -22,6 +22,12 @@ dsh plugin --profile desktop add link:D:\Documents\WorkBuddy\skill市场\dsh-ski
 
 安装后重启一次 DeepSeek Harness 桌面端，左侧栏即出现「技能管理」。
 
+从 GitHub 仓库安装（无需先克隆）：
+
+```bash
+dsh plugin --profile desktop add github:cxk-lc/dsh-skill-manager
+```
+
 > 也可以从其他目录安装，把路径换成本仓库所在位置即可；`link:` 形式便于改完代码后刷新页面直接生效（宿主端改动需重启应用）。
 
 ## 卸载插件 / 回退
