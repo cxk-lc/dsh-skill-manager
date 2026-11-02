@@ -17,7 +17,7 @@
 - 运行命令：`dsh plugin --profile web add link:<本目录>` → `dsh --profile web --no-open --port 3123`
 - 测试命令：`npm test`；UI 冒烟 `node tools/browse.mjs "<带 token 的地址>" --out shot.png`
 - 目录说明：
-  - `docs/`：产品设计文档（product-design.md）与技术方案文档（tech-design.md）
+  - `docs/`：产品设计（product-design.md）、技术方案（tech-design.md）、凭证配置说明（credentials.md）、自测报告、验收清单。凭证说明第 6 节是设置页 tooltip 的文案源，改动需同步（`test/docs-consistency.test.js` 会校验）。
   - `lib/`：宿主端（index/http/zip/frontmatter/paths/registry/install/config/sources）与客户端 `client.js`
   - `test/`：单元测试；`tools/browse.mjs`：无头 Chrome + CDP 冒烟工具
 

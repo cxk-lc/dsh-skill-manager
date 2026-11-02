@@ -12,7 +12,7 @@
 - **GitHub**：粘贴 `owner/repo`、仓库 URL 或 `/tree/分支/路径`，扫描仓库里所有 `SKILL.md` 后按需安装。
 - **安装校验**：必须有 `SKILL.md`，frontmatter 的 `name`（kebab-case）与 `description` 齐全；先写暂存目录再替换，失败不留半成品。
 - **同名冲突**：默认拒绝，界面弹确认后才覆盖。
-- **可选凭证**：GitHub Token / SkillsMP API Key 存在本机 `~/.dsh/skill-manager/config.json`（0600），接口只回是否已配置，不回显明文。
+- **可选凭证**：GitHub Token / SkillsMP API Key 存在本机 `~/.dsh/skill-manager/config.json`（0600），接口只回是否已配置，不回显明文。获取与配置步骤见 **[docs/credentials.md](docs/credentials.md)**。
 
 ## 安装
 
@@ -61,6 +61,25 @@ node tools/browse.mjs "http://127.0.0.1:3123/?token=<token>" --out shot.png \
 | `install` | `spec` = `{kind:'skillhub',slug}` 或 `{kind:'github',owner,repo,branch,path}` |
 | `uninstall` | `rootId` + `dirName` |
 | `config` | 读取/保存凭证 |
+
+## 配置凭证
+
+GitHub Token 与 SkillsMP API Key 都是可选的：不填也能搜索与安装，只是额度低、私有仓库不可用。
+
+- 插件内：左侧栏「技能管理」→ **设置** → 填写 → 保存（字段旁 **?** 悬浮提示含获取路径与额度要点）。
+- 配置文件：`~/.dsh/skill-manager/config.json`，字段 `githubToken` / `skillsmpKey`。
+
+完整的获取步骤、权限取舍、额度表与故障排查见 **[docs/credentials.md](docs/credentials.md)**。
+
+## 文档
+
+| 文档 | 内容 |
+|---|---|
+| [docs/credentials.md](docs/credentials.md) | GitHub Token / SkillsMP API Key 的获取、配置、额度与排查 |
+| [docs/product-design.md](docs/product-design.md) | 产品定位、MVP 范围、明确不做的事 |
+| [docs/tech-design.md](docs/tech-design.md) | 技术栈、插槽与 API 契约、备选方案与风险 |
+| [docs/self-test-report.md](docs/self-test-report.md) | 自测命令、结果与未覆盖项 |
+| [docs/acceptance-checklist.md](docs/acceptance-checklist.md) | 人工验收清单 |
 
 ## 已知限制
 
