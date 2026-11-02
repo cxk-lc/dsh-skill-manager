@@ -86,6 +86,7 @@ GitHub Token 与 SkillsMP API Key 都是可选的：不填也能搜索与安装�
 | [docs/tech-design.md](docs/tech-design.md) | 技术栈、插槽与 API 契约、备选方案与风险 |
 | [docs/self-test-report.md](docs/self-test-report.md) | 自测命令、结果与未覆盖项 |
 | [docs/acceptance-checklist.md](docs/acceptance-checklist.md) | 人工验收清单 |
+| [docs/release-record.md](docs/release-record.md) | 各版本的 tag、验证证据与回滚指令 |
 
 ## 已知限制
 
