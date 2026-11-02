@@ -6,7 +6,7 @@
 ## 0. 准备
 
 - 插件已装入桌面端 profile（`dsh plugin --profile desktop add link:<本目录>`，已执行）。
-- **重启一次 DeepSeek Harness 桌面端**，让宿主与新插件树生效。
+- **请从开始菜单或桌面快捷方式正常启动一次 DeepSeek Harness**（不要从被安全策略约束的终端启动，否则宿主进程可能起不来）。
 - 验收过程中如要清理：`dsh plugin --profile desktop remove dsh-skill-manager` 后重启。
 
 ## 1. 冒烟测试（能不能跑）

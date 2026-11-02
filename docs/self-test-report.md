@@ -59,10 +59,17 @@ node --test test/*.test.js
 
 ### 4. 已知问题与未覆盖项
 
-- **桌面端未由 AI 完成重启验证**：无法在不打断用户的情况下重启 Electron 应用。已用同一份代码在 `web` profile 全量验证；桌面端仅完成「安装到 profile + 依赖解析成功」，最终确认需用户重启后目视。
+- **桌面端未由 AI 完成重启验证**：本机命令行启动 Electron 应用会落入宿主沙箱，`reg.exe` 被程序黑名单拦截，启动后前端代理报 `502 upstream connect failed`（宿主进程退出）。已做对照实验：**把插件从 desktop profile 完整回滚后重启，症状完全一致**，说明该现象来自启动环境而非本插件。结论：桌面端最终确认需用户从开始菜单/快捷方式正常启动后目视。
 - 语言切换（中文 ↔ English）只验证了中文渲染；英文词典未逐屏走查。
 - 未实测：超过 50 MiB 的仓库归档拒绝、SkillsMP 429 限额提示（当前额度未耗尽）、私有仓库 + Token 组合。
 - 桌面端与 web profile 组合不同（桌面端另有 qqbot/usage/surfcore 等插件），未观察交互影响；插件只注册 `sidebar.panellist`、`main`、`webServer`，冲突面小。
+
+### 4.1 桌面端验证记录（供复现）
+
+1. `dsh plugin --profile desktop add link:<本目录>` → profile `package.json` 的 `dsh.profile.bundles` 末尾出现 `dsh-skill-manager`，`node_modules` 生成符号链接。
+2. 命令行重启应用 → 输出 `dsh web: http://127.0.0.1:<port>/?token=…`，随后宿主进程退出，访问端口返回 502。
+3. 回滚（恢复安装前的 `package.json` / `cordis.patch.yml`）后同样 502 → 判定为环境问题。
+4. 已重新安装插件，等待用户正常启动验证。
 
 ### 5. 对应提交
 
