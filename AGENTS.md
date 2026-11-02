@@ -12,13 +12,14 @@
 
 ## 项目信息
 
-- 项目名称：DSH 技能管理插件
-- 技术栈：（技术设计阶段填写）
-- 运行命令：（如 npm start，填写后更新）
-- 测试命令：（如 npm test，填写后更新）
+- 项目名称：DSH 技能管理插件（npm 包名 `dsh-skill-manager`）
+- 技术栈：ESM JavaScript，零运行时依赖、零构建；宿主端 Cordis 插件 + 浏览器端 `window.__ModuleLoader__` 单文件 React；测试用 `node --test`
+- 运行命令：`dsh plugin --profile web add link:<本目录>` → `dsh --profile web --no-open --port 3123`
+- 测试命令：`npm test`；UI 冒烟 `node tools/browse.mjs "<带 token 的地址>" --out shot.png`
 - 目录说明：
   - `docs/`：产品设计文档（product-design.md）与技术方案文档（tech-design.md）
-  - 其他目录：（按需补充）
+  - `lib/`：宿主端（index/http/zip/frontmatter/paths/registry/install/config/sources）与客户端 `client.js`
+  - `test/`：单元测试；`tools/browse.mjs`：无头 Chrome + CDP 冒烟工具
 
 ## 边界约定
 
