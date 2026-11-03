@@ -58,7 +58,7 @@ lib/client.js     侧边栏图标 + 管理页（React.createElement）
 
 **安全**：请求头白名单 `x-dsh-skill-manager: 1`（跨站请求会触发预检且本服务不返回 CORS 头，从浏览器侧阻断 CSRF）；body 上限 1 MiB；方法白名单；所有写入/删除经 `resolveInsideRoot()` 校验父目录严格等于受管根；卸载只接受 `rootId` 枚举，不接受任意路径。
 
-**前端**：单页 + 顶部页签（已安装 / SkillHub / SkillsMP / GitHub / 设置），`useState` 管状态，样式用 `--dsw-alias-*` 变量带 fallback 自动适配深浅色；卸载/覆盖用内联确认条；加载、错误、空态三态显式渲染；文案走 `ctx.locale.register` + `bind`。
+**前端**：单页 + 顶部页签（已安装 / SkillHub / SkillsMP / GitHub / 设置），`useState` 管状态，样式用 `--dsw-alias-*` 变量带 fallback 自动适配深浅色；卸载/覆盖用内联确认条；加载、错误、空态三态显式渲染；文案走 `ctx.locale.register` + `bind`。搜索结果统一由 `CardView` 渲染：标题单行省略（`title` 保留全名）+ 版本徽标（GitHub release 优先，其次 frontmatter version）+ 描述 + 元信息 + 操作按钮，三个平台结构一致。
 
 ## 3. 备选方案与取舍记录
 
@@ -70,7 +70,8 @@ lib/client.js     侧边栏图标 + 管理页（React.createElement）
 | 单一 REST 入口（`/dsh-skill-manager/api`） | 简单、可 curl 自测、与 skillhub 插件同构 | 需自己做 CSRF 防护 | **采用** |
 | GitHub 名称搜索：代码搜索 API | 结果准、只返回真实 SKILL.md | 必须认证；无 Token 不可用 | **采用（有 Token 时）** |
 | GitHub 名称搜索：仓库搜索 + 扫描 | 无需认证 | 需下载归档，实测 45s 仍无结果，不能放在搜索框后面 | 否决（仅作早期方案） |
-| GitHub 名称搜索：借 SkillsMP 索引 | 匿名可用、约 5s 返回、结果含 GitHub 地址 | 依赖第三方索引覆盖度，额度与 SkillsMP 页签共享 | **采用（无 Token 时，noteCode 明示）** |
+| GitHub 名称搜索：借 SkillsMP 索引 | 匿名可用、约 5s 返回、结果含 GitHub 地址 | 依赖第三方索引覆盖度，新仓库可能尚未收录 | **采用（无 Token 时第一顺位）** |
+| GitHub 名称搜索：同名仓库精确匹配 | 1 次仓库搜索 + 1 个小归档，约 2s；能覆盖「技能名 = 仓库名」的新仓库 | 只覆盖同名仓库这一种命名习惯 | **采用（无 Token 时与索引并行，命中去重合并）** |
 | 已安装区用容器查询控制列数 | 面板宽度变化时精确 1~4 列 | 需 Chrome 105+（Electron 37 满足） | **采用** |
 | 浏览器端直连第三方 API | 少一层转发 | CORS 不通、Token 暴露在页面、无法写盘 | 否决 |
 | 安装到 `~/.agents/skills` 也允许 | 覆盖更全 | 破坏其他工具的约定目录语义 | 否决（只读展示） |

@@ -9,7 +9,8 @@
 - **卸载**：二次确认后删除目录或平铺的 `.md` 技能；只允许删除这两个根目录内的条目，拒绝越界路径。
 - **SkillHub**：关键词搜索 + zip 包安装（走 `api.skillhub.cn`）。
 - **SkillsMP**：关键词搜索（匿名 50 次/天，可在设置里填 API Key），按结果里的 GitHub 地址安装。
-- **GitHub**：粘贴 `owner/repo`、仓库 URL 或 `/tree/分支/路径` 扫描整个仓库；也可以只输入 skill 名称搜索（有 Token 走代码搜索，无 Token 借 SkillsMP 索引）。
+- **GitHub**：粘贴 `owner/repo`、仓库 URL 或 `/tree/分支/路径` 扫描整个仓库；也可以只输入 skill 名称搜索——有 Token 走 GitHub 代码搜索，无 Token 时先查 SkillsMP 索引、再按仓库名精确匹配同名仓库并扫描（例如 `stable-delivery-workflow` → `cxk-lc/stable-delivery-workflow`）。
+- **统一卡片**：SkillHub / SkillsMP / GitHub 结果使用同一套卡片结构（单行标题 + 版本徽标 + 描述 + 元信息 + 操作按钮），标题过长时省略并保留完整 tooltip。
 - **Release 版本**：GitHub 来源的卡片会查询仓库最新 Release，并在卡片上显示版本徽标（无 Release 不显示）。
 - **安装校验**：必须有 `SKILL.md`，frontmatter 的 `name`（kebab-case）与 `description` 齐全；先写暂存目录再替换，失败不留半成品。
 - **同名冲突**：默认拒绝，界面弹确认后才覆盖。

@@ -235,3 +235,35 @@ node --test test/*.test.js
 
 - `fix: 强化卡片边框并提示宿主版本不一致`
 - `docs: 补充宿主重启说明与反馈修复记录`
+
+## 2026-11-03 · 名称搜索补强、卡片标题单行、三平台卡片统一
+
+### 1. 问题与判断
+
+- **`stable-delivery-workflow` 搜不到、`cxk-lc/stable-delivery-workflow` 能搜到**：带 `/` 的输入走仓库扫描（直接命中）；纯名称走名称搜索。未配置 Token 时只查 SkillsMP 索引，而该仓库是新建的、尚未被索引收录，因此为空。
+- **卡片标题换行**：`.dsm-name` 原为 `word-break: break-word`，长名称折成两行，挤占了徽标行。
+- **SkillHub / GitHub 卡片不一致**：版本信息一个在 meta 行（`v1.0.13`）、一个在头部徽标（`Release #xxx`），元信息字段也各行其是。
+
+### 2. 改动范围
+
+- **名称搜索补强**：无 Token 时并行执行两条路径——SkillsMP 索引查询 + 仓库名精确匹配（`search/repositories?q=<term> in:name`，仅取名称归一化后完全相同的仓库，最多 2 个，扫描后按技能名过滤），结果按 `owner/repo/path` 去重合并。新增 `noteCode: repo-fallback` 说明来源。
+- **标题单行**：`.dsm-name` 改 `white-space: nowrap; overflow: hidden; text-overflow: ellipsis`，头部 `flex: 1 1 auto; min-width: 0`；搜索结果与已安装卡片都加了 `title` 属性，悬停可见完整名称。
+- **卡片统一**：`CardView` 统一为「单行标题 + 版本徽标（GitHub release 优先，其次 frontmatter version）+ 描述（3 行）+ 元信息（作者 · 星标 · 下载 · 文件数 · 语言）+ 操作按钮」；三个平台共用同一套结构与样式。
+- 版本升到 **0.2.1**，使仍在跑 0.2.0 宿主的页面自动提示重启。
+
+### 3. 验证
+
+- 接口：`githubSearch` 输入 `stable-delivery-workflow` → 2.05s 返回 1 条（`cxk-lc/stable-delivery-workflow`），`noteCode: repo-fallback`。
+- 界面：GitHub 页签同名搜索出现卡片；`.dsm-name` 计算样式 `white-space: nowrap` + `text-overflow: ellipsis`，`title` 为完整名称；SkillHub 搜索结果 12 张卡片与 GitHub 卡片结构一致（版本徽标在右上、按钮右下）。
+- 单元测试：40 项全部通过（新增「无 Token 且索引为空时按仓库名精确匹配」1 项）。
+
+### 4. 已知问题与未覆盖项
+
+- 同名仓库匹配只覆盖「技能名 = 仓库名」的命名习惯；技能名与仓库名不同（如 `pdf` 在 `anthropics/skills` 下）且无 Token 时，仍依赖 SkillsMP 索引或直接输入仓库地址。
+- 无 Token 时名称搜索最多额外消耗 1 次仓库搜索 + 1 个小归档下载；仓库较大时该路径可能较慢，但只针对名称完全相同的仓库。
+- 标题省略后仅能通过 tooltip 查看全名，未做点击展开。
+
+### 5. 对应提交
+
+- `fix: 名称搜索补上同名仓库匹配，卡片标题单行并统一三平台布局`
+- `docs: 同步名称搜索回退链与统一卡片的说明`
