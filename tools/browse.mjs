@@ -2,7 +2,7 @@
 // Zero deps (Node 22+ global fetch + WebSocket). Usage:
 //   node tools/browse.mjs <url> [--out shot.png] [--wait 3000] [--eval "expr"] [--width 1440] [--height 1000]
 import { spawn } from 'node:child_process'
-import { mkdtemp, writeFile, rm } from 'node:fs/promises'
+import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -20,6 +20,7 @@ const waitMs = Number(flag('wait', 3500))
 const evalExpr = flag('eval')
 const width = Number(flag('width', 1440))
 const height = Number(flag('height', 1000))
+const injectFile = flag('inject')
 const keepOpen = args.includes('--keep')
 
 if (!url) {
@@ -138,6 +139,10 @@ try {
     deviceScaleFactor: 1,
     mobile: false,
   })
+  if (injectFile) {
+    const source = await readFile(injectFile, 'utf8')
+    await page.send('Page.addScriptToEvaluateOnNewDocument', { source })
+  }
   await page.send('Page.navigate', { url })
   await sleep(waitMs)
 
