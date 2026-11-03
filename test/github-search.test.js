@@ -147,10 +147,38 @@ test('无 Token 时通过注入索引回退，只保留名称匹配的 GitHub �
   assert.equal(result.items[0].spec.path, 'skills/pdf-helper')
 })
 
-test('没有索引也没有 Token 时返回 token-required，且不发网络请求', async () => {
-  const calls = mockFetch([])
+test('没有索引时仍尝试同名仓库，未命中则返回 token-required', async () => {
+  const calls = mockFetch([[/search\/repositories/, () => json({ items: [] })]])
   const result = await searchGithub({ input: 'pdf-helper' })
   assert.equal(result.items.length, 0)
   assert.equal(result.noteCode, 'token-required')
-  assert.equal(calls.length, 0)
+  assert.ok(calls.length > 0 && calls.every((url) => url.includes('search/repositories')), '只应请求仓库搜索')
+})
+
+test('无 Token 且索引为空时，按仓库名精确匹配同名仓库并扫描', async () => {
+  mockFetch([
+    [
+      /api\.github\.com\/search\/repositories\?q=stable-delivery-workflow\+in%3Aname/,
+      () => json({ items: [{ full_name: 'cxk-lc/stable-delivery-workflow', name: 'stable-delivery-workflow' }] }),
+    ],
+    [/api\.github\.com\/repos\/cxk-lc\/stable-delivery-workflow$/, () => json({ default_branch: 'main' })],
+    [
+      /codeload\.github\.com\/cxk-lc\/stable-delivery-workflow\/zip/,
+      () => zip({ 'stable-delivery-workflow-main/SKILL.md': skillMd('stable-delivery-workflow', '流程技能') }),
+    ],
+    [
+      /api\.github\.com\/repos\/cxk-lc\/stable-delivery-workflow\/releases\/latest$/,
+      () => json({ message: 'Not Found' }, 404),
+    ],
+  ])
+
+  const result = await searchGithub({
+    input: 'stable-delivery-workflow',
+    fallbackIndex: async () => [],
+  })
+  assert.equal(result.mode, 'name')
+  assert.equal(result.noteCode, 'repo-fallback')
+  assert.equal(result.items.length, 1)
+  assert.equal(result.items[0].name, 'stable-delivery-workflow')
+  assert.equal(result.items[0].spec.owner, 'cxk-lc')
 })

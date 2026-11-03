@@ -1,6 +1,6 @@
 {
   "name": "dsh-skill-manager",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "DSH Skill Manager · 在 DeepSeek Harness 左侧栏管理技能：从 SkillHub / SkillsMP / GitHub 搜索安装，卸载本机已装技能",
   "type": "module",
   "license": "MIT",
