@@ -29,7 +29,9 @@ dsh plugin --profile desktop add link:D:\Documents\WorkBuddy\skill市场\dsh-ski
 dsh plugin --profile desktop add github:cxk-lc/dsh-skill-manager
 ```
 
-> 也可以从其他目录安装，把路径换成本仓库所在位置即可；`link:` 形式便于改完代码后刷新页面直接生效（宿主端改动需重启应用）。
+> 也可以从其他目录安装，把路径换成本仓库所在位置即可；`link:` 形式便于改完代码后刷新页面直接生效。
+>
+> **注意**：浏览器端（界面/CSS）改动刷新页面即可；宿主端（`lib/index.js`、`lib/sources/*`）改动必须重启 DeepSeek Harness。若页面提示“插件前端 X 已更新，但 DSH 宿主仍是 Y”，重启应用即可消除，同时启用「安装到全局 agents」与「GitHub 名称搜索」。
 
 ## 卸载插件 / 回退
 
