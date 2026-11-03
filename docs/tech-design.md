@@ -47,13 +47,14 @@ lib/client.js     侧边栏图标 + 管理页（React.createElement）
 | `installed` | — | `{ items: Skill[] }` |
 | `search` | `{ platform, query, page?, limit? }` | `{ items: Card[], total, hasMore }` |
 | `repoScan` | `{ input }` | `{ owner, repo, branch, skills: RepoSkill[] }` |
-| `install` | `{ spec, overwrite? }` | `{ name, path, files }` |
+| `githubSearch` | `{ input, limit? }` | `{ mode: 'repo'\|'name', items, noteCode? }` |
+| `install` | `{ spec, overwrite?, targetRootId? }` | `{ name, path, files, rootId }` |
 | `uninstall` | `{ rootId, name }` | `{ name, path }` |
 | `config` | `{ save?: { githubToken?, skillsmpKey? } }` | `{ githubToken, skillsmpKey }` |
 
 `spec` 只有两种：`{ kind:'skillhub', slug }` 与 `{ kind:'github', owner, repo, branch, path }`。SkillsMP 的结果最终折算成 GitHub spec。
 
-**安装落盘**：统装到 `~/.dsh/skills/<skill-name>`；`~/.agents/skills` 仅展示与卸载，不作为安装目标。流程为「取 zip → 归一化前缀 → 校验 SKILL.md → 写暂存目录 → 冲突检查 → rm 旧目录 → rename 到位」，任一步失败清理暂存。
+**安装落盘**：两个根都可写，`targetRootId` 决定 `~/.dsh/skills`（默认）或 `~/.agents/skills`；冲突检测按目标根独立判断。流程为「取 zip → 归一化前缀 → 校验 SKILL.md → 写暂存目录 → 冲突检查 → rm 旧目录 → rename 到位」，任一步失败清理暂存。Windows 上 rename 可能被文件监听/杀软短暂占用而抛 `EPERM/EBUSY`，`renameWithRetry` 以 120/240/360/480ms 退避重试至多 5 次。
 
 **安全**：请求头白名单 `x-dsh-skill-manager: 1`（跨站请求会触发预检且本服务不返回 CORS 头，从浏览器侧阻断 CSRF）；body 上限 1 MiB；方法白名单；所有写入/删除经 `resolveInsideRoot()` 校验父目录严格等于受管根；卸载只接受 `rootId` 枚举，不接受任意路径。
 
@@ -67,6 +68,10 @@ lib/client.js     侧边栏图标 + 管理页（React.createElement）
 | tsdown + TypeScript（官方插件做法） | 类型安全、可用官方类型包 | 需装一长串 devDeps 与构建链，本地 link 安装后每次改动要重编 | 备选（后续要发 npm 再迁移） |
 | 宿主端用 Typert remote 服务而非 HTTP 路由 | 类型化 RPC、鉴权由宿主负责 | 需要官方类型包与编译期 descriptor 契约，改造成本高 | 备选 |
 | 单一 REST 入口（`/dsh-skill-manager/api`） | 简单、可 curl 自测、与 skillhub 插件同构 | 需自己做 CSRF 防护 | **采用** |
+| GitHub 名称搜索：代码搜索 API | 结果准、只返回真实 SKILL.md | 必须认证；无 Token 不可用 | **采用（有 Token 时）** |
+| GitHub 名称搜索：仓库搜索 + 扫描 | 无需认证 | 需下载归档，实测 45s 仍无结果，不能放在搜索框后面 | 否决（仅作早期方案） |
+| GitHub 名称搜索：借 SkillsMP 索引 | 匿名可用、约 5s 返回、结果含 GitHub 地址 | 依赖第三方索引覆盖度，额度与 SkillsMP 页签共享 | **采用（无 Token 时，noteCode 明示）** |
+| 已安装区用容器查询控制列数 | 面板宽度变化时精确 1~4 列 | 需 Chrome 105+（Electron 37 满足） | **采用** |
 | 浏览器端直连第三方 API | 少一层转发 | CORS 不通、Token 暴露在页面、无法写盘 | 否决 |
 | 安装到 `~/.agents/skills` 也允许 | 覆盖更全 | 破坏其他工具的约定目录语义 | 否决（只读展示） |
 
@@ -78,6 +83,8 @@ lib/client.js     侧边栏图标 + 管理页（React.createElement）
 - **卸载误删**：双根白名单 + 名称白名单 + 根内校验 + 界面二次确认 + 不触碰 `.` 开头的目录（含 `.system`）。
 - **zip 炸弹/超大仓库**：下载上限 50 MiB，解包总量上限 200 MiB、条目上限 5000。
 - **CSRF 到本地 API**：无鉴权路由可被本机页面构造请求。对策：强制自定义请求头 + 不返回 CORS 头。
+- **无 Token 的名称搜索依赖 SkillsMP**：索引不可用或额度耗尽时结果为空。对策：返回 `noteCode`（`index-empty` / `index-unavailable` / `token-required`），界面给出可读说明并指向设置页。
+- **Windows 目录 rename 偶发 EPERM**：实测同一请求第二次成功。对策：退避重试 + 失败清理暂存目录。
 
 ## 5. 运行与测试方式
 

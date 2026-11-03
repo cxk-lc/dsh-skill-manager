@@ -156,3 +156,44 @@ node --test test/*.test.js
 ### 5. 对应提交
 
 - 本轮提交：`refactor: 设置页凭证说明改为点击展开收起`
+
+## 2026-11-03 · 卡片化、安装目标、GitHub 名称搜索与 Release 版本
+
+### 1. 改动范围
+
+- **已安装卡片**：`InstalledView` 由竖排列表改为卡片网格；`.dsm-body` 设 `container-type: inline-size`，`.dsm-grid` 在容器宽度 520 / 820 / 1080px 处切换 2 / 3 / 4 列（默认 1 列）；「全部」排序改为用户级优先（`registry.js` 按 root rank + 名称）。
+- **安装目标可选**：`paths.skillRoots()` 两个根都可写；`installSkill({ targetRootId })` 支持 `user` / `agents`，冲突检测按目标根独立；页面右上角新增「安装到」分段选择器，冲突提示带上目标目录名。
+- **GitHub 按名称搜索**：新增 `searchGithub()` 与 `githubSearch` 接口；`looksLikeRepoRef()` 区分仓库引用与名称；有 Token 走 `search/code` + `raw.githubusercontent.com/HEAD` 读取 SKILL.md，无 Token 通过宿主注入的 SkillsMP 索引回退，返回 `noteCode` 说明来源。
+- **Release 版本**：`latestRelease()` 查询 `releases/latest`，10 分钟缓存（含 404 负缓存）；仓库扫描与名称搜索结果都补 `release` 字段；卡片显示 `Release #短哈希` 徽标，完整 tag 放 `title`。
+- **Windows rename 重试**：实测安装到 `~/.agents/skills` 偶发 `EPERM`（文件监听/杀软占用），新增 `renameWithRetry`（120/240/360/480ms 退避，最多 5 次）。
+
+### 2. 测试命令与结果
+
+```bash
+node --test test/*.test.js
+```
+
+结果：**39 项全部通过**（原 31 + 新增 8：GitHub 名称搜索 / release 缓存 / 注入索引回退 / 安装到 agents / 排序）。
+
+### 3. 人工/辅助验证
+
+- 列数（无头 Chrome，按视口宽度实测）：1440→4 列、980→3 列、720→2 列、560→1 列；面板侧边栏折叠时按容器宽度自适应。
+- 排序：17 张卡片首个为 `stable-delivery-workflow`（用户级），其后均为全局 agents。
+- 安装目标：切到「全局 agents」后经接口安装 `pdf-image-text-extractor` 成功写入 `~/.agents/skills`，二次安装返回「已存在于「全局 agents」」；界面卡片显示 `~/.agents/skills/...`，卸载确认框路径一致，删除后目录消失。
+- 名称搜索：输入 `pdf` → 4.8s 返回 7 张卡（`nano-pdf`、`office-export-pdf`、`pdf` …），标题为「按名称匹配 · 7 个技能」，并显示未配置 Token 的索引说明。
+- Release：`vercel-labs/agent-skills` 9 张卡片均显示 `Release #1a2c79d`（完整 tag 在 tooltip）；`anthropics/skills` 无 release 时不显示徽标。
+- 控制台全程 0 异常。
+
+### 4. 已知问题与未覆盖项
+
+- 无 Token 时名称搜索依赖 SkillsMP 索引（覆盖度与额度受其限制），结果为空时提示配置 Token 或改用仓库地址。
+- Release 查询每仓库 1 次 API（有 10 分钟缓存）；匿名 60 次/小时，批量扫描大量仓库时可能被限流，失败时静默不显示徽标。
+- Release 版本仅用于展示，不做技能升级/回滚。
+- 安装到 `~/.agents/skills` 会与其它 AI 工具共享目录；重名冲突按该目录独立判断。
+- 窄窗口（<560px）布局未逐档截图。
+
+### 5. 对应提交
+
+- `feat: 支持选择安装目标并按名称搜索 GitHub 技能`
+- `feat: 已安装改为响应式卡片并展示 Release 版本`
+- `docs: 同步卡片、安装目标与 GitHub 名称搜索的规格`

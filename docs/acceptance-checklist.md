@@ -17,11 +17,15 @@
 
 ## 2. 主流程走查（好不好用）
 
-- [ ] 「已安装」页签列出 `~/.dsh/skills` 与 `~/.agents/skills` 下的技能（应能看到 `stable-delivery-workflow` 与若干 dingtalk 技能）
+- [ ] 「已安装」页签以卡片列出 `~/.dsh/skills` 与 `~/.agents/skills` 下的技能（应能看到 `stable-delivery-workflow` 与若干 dingtalk 技能），缩放窗口时一行依次为 4 / 3 / 2 / 1 张卡片
+- [ ] 「全部」筛选下，用户级技能排在全局 agents 技能之前；单卡显示名称、卸载按钮、版本/来源/目录徽标、描述、路径与文件数
 - [ ] 顶部筛选框输入关键字能实时过滤；「全部 / 用户级 / 全局 agents」切换正确
-- [ ] SkillHub 页签搜索 `pdf` 有结果卡片，点「安装」→ 按钮变「安装中…」→ 提示"已安装"→ 已安装列表出现该技能
+- [ ] 页面右上角「安装到」默认「用户级」；切到「全局 agents」后安装，技能写入 `~/.agents/skills`（卡片路径可见），提示语包含目标目录
+- [ ] SkillHub 页签搜索 `pdf` 有结果卡片，点「安装」→ 按钮变「安装中…」→ 提示"已安装"→ 已安装卡片区出现该技能
 - [ ] SkillsMP 页签搜索 `pdf` 有结果卡片，安装成功（匿名额度内）
-- [ ] GitHub 页签输入 `anthropics/skills` → 扫描 → 列出 20 个技能 → 安装其中一个成功
+- [ ] GitHub 页签输入 `anthropics/skills` → 搜索 → 列出 20 个技能 → 安装其中一个成功
+- [ ] GitHub 页签只输入 skill 名称（如 `pdf`）→ 按名称返回卡片；无 Token 时显示"使用 SkillsMP 索引"的说明
+- [ ] GitHub 卡片对带 Release 的仓库（如 `vercel-labs/agent-skills`）显示 `Release #xxxxxxx` 徽标，悬停可见完整 tag；无 Release 的仓库不显示
 - [ ] 卸载：点「卸载」弹出确认框（显示名称与路径），点「取消」不删除；点「删除」后目录消失、列表移除
 
 ## 3. 边界与异常（稳不稳）
