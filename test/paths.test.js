@@ -26,7 +26,7 @@ test('skillRoots 提供用户级与全局 agents 两个根', () => {
     ['user', 'agents'],
   )
   assert.equal(roots[0].writable, true)
-  assert.equal(roots[1].writable, false)
+  assert.equal(roots[1].writable, true)
 })
 
 test('displayPath 用 ~ 缩写用户目录', () => {

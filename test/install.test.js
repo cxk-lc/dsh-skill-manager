@@ -107,6 +107,30 @@ test('卸载拒绝越界目录名', async () => {
   await assert.rejects(() => uninstallSkill({ rootId: 'other', dirName: 'x' }), /未知的技能目录/)
 })
 
+test('可安装到全局 agents 目录，冲突按目标目录独立判断', async () => {
+  globalThis.fetch = async () => zipResponse({ 'SKILL.md': skillMd('shared-skill', 'agents copy') })
+  const result = await installSkill({ spec: { kind: 'skillhub', slug: 'shared-skill' }, targetRootId: 'agents' })
+  assert.equal(result.rootId, 'agents')
+  assert.match(result.path, /agents\/skills\/shared-skill$/)
+
+  // 同名技能装在另一个根下不算冲突
+  globalThis.fetch = async () => zipResponse({ 'SKILL.md': skillMd('shared-skill', 'user copy') })
+  const userCopy = await installSkill({ spec: { kind: 'skillhub', slug: 'shared-skill' } })
+  assert.equal(userCopy.rootId, 'user')
+
+  const items = await listInstalled()
+  const copies = items.filter((item) => item.name === 'shared-skill')
+  assert.equal(copies.length, 2)
+  assert.deepEqual(
+    copies.map((item) => item.rootId),
+    ['user', 'agents'],
+    '用户级应排在全局 agents 之前',
+  )
+
+  await uninstallSkill({ rootId: 'agents', dirName: 'shared-skill' })
+  await uninstallSkill({ rootId: 'user', dirName: 'shared-skill' })
+})
+
 test('读取平铺 .md 形式的技能', async () => {
   const dir = path.join(process.env.DSH_AGENTS_HOME, 'skills')
   await import('node:fs/promises').then((fs) => fs.mkdir(dir, { recursive: true }))
